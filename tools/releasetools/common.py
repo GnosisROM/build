@@ -2674,6 +2674,7 @@ class BlockDifference(object):
       script.Print("Patching %s image unconditionally..." % (self.partition,))
     else:
       script.Print("Patching %s image after verification." % (self.partition,))
+      script.Print(" ")
 
     if progress:
       script.ShowProgress(progress, 0)

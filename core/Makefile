@@ -15,7 +15,7 @@ LOCAL_PATH := $(BUILD_SYSTEM)
 #$(2): the dest
 define check-product-copy-files
 $(if $(filter-out $(TARGET_COPY_OUT_SYSTEM_OTHER)/%,$(2)), \
-  $(if $(filter %.apk, $(2)),$(error \
+  $(if $(filter %.exe, $(2)),$(error \
      Prebuilt apk found in PRODUCT_COPY_FILES: $(1), use BUILD_PREBUILT instead!))) \
 $(if $(filter true,$(BUILD_BROKEN_VINTF_PRODUCT_COPY_FILES)),, \
   $(if $(filter $(TARGET_COPY_OUT_SYSTEM)/etc/vintf/% \
@@ -229,6 +229,7 @@ define generate-common-build-props
 	PRODUCT_MANUFACTURER="$(PRODUCT_MANUFACTURER)" \
 	PRODUCT_MODEL="$(PRODUCT_MODEL)" \
 	PRODUCT_NAME="$(TARGET_PRODUCT)" \
+	$(PRODUCT_BUILD_PROP_OVERRIDES) \
 	$(call generate-common-build-props-with-product-vars-set,$(1),$(2))
 endef
 
@@ -324,7 +325,7 @@ endif
 # Both of these tags will be removed and replaced with "release-keys"
 # when the target-files is signed in a post-build step.
 ifeq ($(DEFAULT_SYSTEM_DEV_CERTIFICATE),build/make/target/product/security/testkey)
-BUILD_KEYS := test-keys
+BUILD_KEYS := release-keys
 else
 BUILD_KEYS := dev-keys
 endif
@@ -333,7 +334,7 @@ BUILD_VERSION_TAGS := $(subst $(space),$(comma),$(sort $(BUILD_VERSION_TAGS)))
 
 # A human-readable string that descibes this build in detail.
 build_desc := $(TARGET_PRODUCT)-$(TARGET_BUILD_VARIANT) $(PLATFORM_VERSION) $(BUILD_ID) $(BUILD_NUMBER_FROM_FILE) $(BUILD_VERSION_TAGS)
-$(intermediate_system_build_prop): PRIVATE_BUILD_DESC := $(build_desc)
+$(intermediate_system_build_prop): PRIVATE_BUILD_DESC ?= $(build_desc)
 
 # The string used to uniquely identify the combined build and product; used by the OTA server.
 ifeq (,$(strip $(BUILD_FINGERPRINT)))
@@ -432,6 +433,7 @@ endif
 	        PRODUCT_MODEL="$(PRODUCT_SYSTEM_MODEL)" \
 	        PRODUCT_NAME="$(PRODUCT_SYSTEM_NAME)" \
 	        PRODUCT_DEVICE="$(PRODUCT_SYSTEM_DEVICE)" \
+	        $(PRODUCT_BUILD_PROP_OVERRIDES) \
 	        $(call generate-common-build-props-with-product-vars-set,system,$@)
 	$(hide) TARGET_BUILD_TYPE="$(TARGET_BUILD_VARIANT)" \
 	        TARGET_BUILD_FLAVOR="$(TARGET_BUILD_FLAVOR)" \
@@ -463,6 +465,7 @@ endif
 	        TARGET_CPU_ABI_LIST_64_BIT="$(TARGET_CPU_ABI_LIST_64_BIT)" \
 	        TARGET_CPU_ABI="$(TARGET_CPU_ABI)" \
 	        TARGET_CPU_ABI2="$(TARGET_CPU_ABI2)" \
+		$(PRODUCT_BUILD_PROP_OVERRIDES) \
 	        bash $(BUILDINFO_SH) >> $@
 	$(hide) $(foreach file,$(system_prop_file), \
 	    if [ -f "$(file)" ]; then \
@@ -4927,7 +4930,7 @@ name := $(TARGET_PRODUCT)
 ifeq ($(TARGET_BUILD_TYPE),debug)
   name := $(name)_debug
 endif
-name := $(name)-ota-$(FILE_NAME_TAG)
+name := android-$(PRODUCT_VERSION)-$(shell date +%Y%m%d)-$(name)
 
 INTERNAL_OTA_PACKAGE_TARGET := $(PRODUCT_OUT)/$(name).zip
 INTERNAL_OTA_METADATA := $(PRODUCT_OUT)/ota_metadata
@@ -5546,11 +5549,11 @@ $(INTERNAL_FINDBUGS_HTML_TARGET): $(INTERNAL_FINDBUGS_XML_TARGET)
 # These are some additional build tasks that need to be run.
 ifneq ($(dont_bother),true)
 include $(sort $(wildcard $(BUILD_SYSTEM)/tasks/*.mk))
--include $(sort $(wildcard vendor/*/build/tasks/*.mk))
+include $(sort $(wildcard vendor/*/build/tasks/*.mk))
 -include $(sort $(wildcard device/*/build/tasks/*.mk))
 -include $(sort $(wildcard product/*/build/tasks/*.mk))
 # Also the project-specific tasks
--include $(sort $(wildcard vendor/*/*/build/tasks/*.mk))
+include $(sort $(wildcard vendor/*/*/build/tasks/*.mk))
 -include $(sort $(wildcard device/*/*/build/tasks/*.mk))
 -include $(sort $(wildcard product/*/*/build/tasks/*.mk))
 # Also add test specifc tasks

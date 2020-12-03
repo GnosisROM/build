@@ -376,6 +376,11 @@ $$(foreach rule,$$(PRODUCT_$(1)_OVERRIDES),\
         $$(error Rule "$$(rule)" in PRODUCT_$(1)_OVERRIDE is not <module_name>:<new_value>)))
 endef
 
+# used for overriding properties in build.prop
+PRODUCT_BUILD_PROP_OVERRIDES := \
+    $(strip $(PRODUCTS.$(INTERNAL_PRODUCT).PRODUCT_BUILD_PROP_OVERRIDES))
+.KATI_READONLY := PRODUCT_BUILD_PROP_OVERRIDES
+
 $(foreach var, \
     MANIFEST_PACKAGE_NAME \
     PACKAGE_NAME \
