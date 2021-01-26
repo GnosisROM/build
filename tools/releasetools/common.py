@@ -575,7 +575,7 @@ class BuildInfo(object):
 def ReadFromInputFile(input_file, fn):
   """Reads the contents of fn from input zipfile or directory."""
   if isinstance(input_file, zipfile.ZipFile):
-    return input_file.read(fn).decode()
+    return input_file.read(fn).decode('utf-8', 'ignore')
   else:
     path = os.path.join(input_file, *fn.split("/"))
     try:
@@ -2674,7 +2674,6 @@ class BlockDifference(object):
       script.Print("Patching %s image unconditionally..." % (self.partition,))
     else:
       script.Print("Patching %s image after verification." % (self.partition,))
-      script.Print(" ")
 
     if progress:
       script.ShowProgress(progress, 0)

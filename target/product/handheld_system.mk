@@ -23,7 +23,6 @@ $(call inherit-product-if-exists, frameworks/base/data/fonts/fonts.mk)
 $(call inherit-product-if-exists, external/google-fonts/dancing-script/fonts.mk)
 $(call inherit-product-if-exists, external/google-fonts/carrois-gothic-sc/fonts.mk)
 $(call inherit-product-if-exists, external/google-fonts/coming-soon/fonts.mk)
-$(call inherit-product-if-exists, external/google-fonts/cutive-mono/fonts.mk)
 $(call inherit-product-if-exists, external/google-fonts/source-sans-pro/fonts.mk)
 $(call inherit-product-if-exists, external/noto-fonts/fonts.mk)
 $(call inherit-product-if-exists, external/roboto-fonts/fonts.mk)
@@ -85,5 +84,8 @@ PRODUCT_COPY_FILES += \
 
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.carrier=unknown \
-    ro.config.notification_sound=Popcorn.ogg \
-    ro.config.alarm_alert=Bright_morning.ogg
+    ro.config.notification_sound=OnTheHunt.ogg \
+    ro.config.alarm_alert=Alarm_Classic.ogg
+
+# Include vendor build hook
+$(call inherit-product-if-exists, vendor/gnosis/build/product.mk)

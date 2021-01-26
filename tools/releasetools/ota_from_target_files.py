@@ -742,12 +742,12 @@ def WriteFullOTAPackage(input_zip, output_file):
   assert HasRecoveryPatch(input_zip, info_dict=OPTIONS.info_dict)
 
   # Assertions (e.g. downgrade check, device properties check).
-  #ts = target_info.GetBuildProp("ro.build.date.utc")
-  #ts_text = target_info.GetBuildProp("ro.build.date")
-  #script.AssertOlderBuild(ts, ts_text)
+  ts = target_info.GetBuildProp("ro.build.date.utc")
+  ts_text = target_info.GetBuildProp("ro.build.date")
+  script.AssertOlderBuild(ts, ts_text)
 
-  #target_info.WriteDeviceAssertions(script, OPTIONS.oem_no_mount)
-  #device_specific.FullOTA_Assertions()
+  target_info.WriteDeviceAssertions(script, OPTIONS.oem_no_mount)
+  device_specific.FullOTA_Assertions()
 
   block_diff_dict = GetBlockDifferences(target_zip=input_zip, source_zip=None,
                                         target_info=target_info,
@@ -774,8 +774,8 @@ def WriteFullOTAPackage(input_zip, output_file):
   #    complete script normally
   #    (allow recovery to mark itself finished and reboot)
 
-  #recovery_img = common.GetBootableImage("recovery.img", "recovery.img",
-  #                                       OPTIONS.input_tmp, "RECOVERY")
+  recovery_img = common.GetBootableImage("recovery.img", "recovery.img",
+                                         OPTIONS.input_tmp, "RECOVERY")
   if OPTIONS.two_step:
     if not target_info.get("multistage_support"):
       assert False, "two-step packages not supported by this build"
@@ -790,7 +790,7 @@ if get_stage("%(bcb_dev)s") == "2/3" then
 
     # Stage 2/3: Write recovery image to /recovery (currently running /boot).
     script.Comment("Stage 2/3")
-    #script.WriteRawImage("/recovery", "recovery.img")
+    script.WriteRawImage("/recovery", "recovery.img")
     script.AppendExtra("""
 set_stage("%(bcb_dev)s", "3/3");
 reboot_now("%(bcb_dev)s", "recovery");
@@ -803,46 +803,6 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
   # Dump fingerprints
   script.Print("Target: {}".format(target_info.fingerprint))
 
-  script.Print(" ")
-  script.Print(" ");
-  script.Print("       AAAAAAAAAAAAAAA      HHHHHHH     HHHHHHH       ");
-  script.Print("      A:::::::::::::::A     H:::::H     H:::::H       ");
-  script.Print("     A::::::AAAAA::::::A    H:::::H     H:::::H       ");
-  script.Print("     A:::::A     A:::::A    H:::::H     H:::::H       ");
-  script.Print("     A:::::A     A:::::A    H:::::H     H:::::H       ");
-  script.Print("     A:::::A     A:::::A    H:::::HHHHHHH:::::H       ");
-  script.Print("     A:::::AAAAAAA:::::A    H:::::::::::::::::H       ");
-  script.Print("     A:::::::::::::::::A    H:::::::::::::::::H       ");
-  script.Print("     A:::::AAAAAAA:::::A    H:::::HHHHHHH:::::H       ");
-  script.Print("     A:::::A     A:::::A    H:::::H     H:::::H       ");
-  script.Print("     A:::::A     A:::::A    H:::::H     H:::::H       ");
-  script.Print("     A:::::A     A:::::A    H:::::H     H:::::H       ");
-  script.Print("     A:::::A     A:::::A    H:::::H     H:::::H       ");
-  script.Print("     AAAAAAA     AAAAAAA    HHHHHHH     HHHHHHH       ");
-  script.Print("            AEON                   HOROS              ");
-
-  mod_version = target_info.GetBuildProp("ro.mod.version")
-  android_version = target_info.GetBuildProp("ro.build.version.release")
-  security_patch = target_info.GetBuildProp("ro.build.version.security_patch")
-  build_date = target_info.GetBuildProp("ro.build.date")
-  build_type = target_info.GetBuildProp("ro.build.type")
-  device = target_info.GetBuildProp("ro.product.device")
-
-  script.Print(" ==================================================");
-  script.Print(" MOD version     : %s"%(mod_version));
-  script.Print("");
-  script.Print(" Android version : %s"%(android_version));
-  script.Print("");
-  script.Print(" Security patch  : %s"%(security_patch));
-  script.Print("");
-  script.Print(" Build date      : %s"%(build_date));
-  script.Print("");
-  script.Print(" Build type      : %s"%(build_type));
-  script.Print("");
-  script.Print(" ==================================================");
-  script.Print(" Device          : %s"%(device));
-  script.Print(" ==================================================");
-  script.AppendExtra("ifelse(is_mounted(\"/system\"), unmount(\"/system\"));")
   device_specific.FullOTA_InstallBegin()
 
   # All other partitions as well as the data wipe use 10% of the progress, and
@@ -874,9 +834,6 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
       "boot.img", "boot.img", OPTIONS.input_tmp, "BOOT")
   common.CheckSize(boot_img.data, "boot.img", target_info)
   common.ZipWriteStr(output_zip, "boot.img", boot_img.data)
-
-  script.Print("Flashing boot image...")
-  script.Print(" ")
 
   script.WriteRawImage("/boot", "boot.img")
 

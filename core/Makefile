@@ -229,7 +229,6 @@ define generate-common-build-props
 	PRODUCT_MANUFACTURER="$(PRODUCT_MANUFACTURER)" \
 	PRODUCT_MODEL="$(PRODUCT_MODEL)" \
 	PRODUCT_NAME="$(TARGET_PRODUCT)" \
-	$(PRODUCT_BUILD_PROP_OVERRIDES) \
 	$(call generate-common-build-props-with-product-vars-set,$(1),$(2))
 endef
 
@@ -433,7 +432,6 @@ endif
 	        PRODUCT_MODEL="$(PRODUCT_SYSTEM_MODEL)" \
 	        PRODUCT_NAME="$(PRODUCT_SYSTEM_NAME)" \
 	        PRODUCT_DEVICE="$(PRODUCT_SYSTEM_DEVICE)" \
-	        $(PRODUCT_BUILD_PROP_OVERRIDES) \
 	        $(call generate-common-build-props-with-product-vars-set,system,$@)
 	$(hide) TARGET_BUILD_TYPE="$(TARGET_BUILD_VARIANT)" \
 	        TARGET_BUILD_FLAVOR="$(TARGET_BUILD_FLAVOR)" \
@@ -451,6 +449,7 @@ endif
 	        PLATFORM_VERSION="$(PLATFORM_VERSION)" \
 	        PLATFORM_VERSION_LAST_STABLE="$(PLATFORM_VERSION_LAST_STABLE)" \
 	        PLATFORM_SECURITY_PATCH="$(PLATFORM_SECURITY_PATCH)" \
+	        PLATFORM_REAL_SECURITY_PATCH="$(PLATFORM_REAL_SECURITY_PATCH)" \
 	        PLATFORM_BASE_OS="$(PLATFORM_BASE_OS)" \
 	        PLATFORM_SDK_VERSION="$(PLATFORM_SDK_VERSION)" \
 	        PLATFORM_PREVIEW_SDK_VERSION="$(PLATFORM_PREVIEW_SDK_VERSION)" \
@@ -465,7 +464,6 @@ endif
 	        TARGET_CPU_ABI_LIST_64_BIT="$(TARGET_CPU_ABI_LIST_64_BIT)" \
 	        TARGET_CPU_ABI="$(TARGET_CPU_ABI)" \
 	        TARGET_CPU_ABI2="$(TARGET_CPU_ABI2)" \
-		$(PRODUCT_BUILD_PROP_OVERRIDES) \
 	        bash $(BUILDINFO_SH) >> $@
 	$(hide) $(foreach file,$(system_prop_file), \
 	    if [ -f "$(file)" ]; then \
@@ -4930,7 +4928,7 @@ name := $(TARGET_PRODUCT)
 ifeq ($(TARGET_BUILD_TYPE),debug)
   name := $(name)_debug
 endif
-name := android-$(PRODUCT_VERSION)-$(shell date +%Y%m%d)-$(name)
+name := $(name)-ota-$(FILE_NAME_TAG)
 
 INTERNAL_OTA_PACKAGE_TARGET := $(PRODUCT_OUT)/$(name).zip
 INTERNAL_OTA_METADATA := $(PRODUCT_OUT)/ota_metadata
@@ -5549,11 +5547,11 @@ $(INTERNAL_FINDBUGS_HTML_TARGET): $(INTERNAL_FINDBUGS_XML_TARGET)
 # These are some additional build tasks that need to be run.
 ifneq ($(dont_bother),true)
 include $(sort $(wildcard $(BUILD_SYSTEM)/tasks/*.mk))
-include $(sort $(wildcard vendor/*/build/tasks/*.mk))
+-include $(sort $(wildcard vendor/*/build/tasks/*.mk))
 -include $(sort $(wildcard device/*/build/tasks/*.mk))
 -include $(sort $(wildcard product/*/build/tasks/*.mk))
 # Also the project-specific tasks
-include $(sort $(wildcard vendor/*/*/build/tasks/*.mk))
+-include $(sort $(wildcard vendor/*/*/build/tasks/*.mk))
 -include $(sort $(wildcard device/*/*/build/tasks/*.mk))
 -include $(sort $(wildcard product/*/*/build/tasks/*.mk))
 # Also add test specifc tasks
